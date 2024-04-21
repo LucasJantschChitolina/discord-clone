@@ -9,81 +9,67 @@ datasource db {
 }
 
 model Profile {
-  id String @id @default(uuid())
-  userId String @unique
-  name String
-  imageUrl String @db.Text // note: gives more chars to a string in this case
-  email String @db.Text
+  id           String @id @default(uuid())
+  userId       String @unique
+  name         String
+  imageUrl     String @db.Text
+  email        String @db.Text
 
-  servers Server[]
-  members Member[]
-  channels Channel[]
+  reviews      Review[]
+  comments     Comment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Match {
+  id          String @id @default(uuid())
+  date        DateTime
+  location    String?
+  homeTeam    String
+  awayTeam    String
+  result      String?  // e.g., "3-1", "0-0", etc.
+  competition String
+  season      String
+  round       String
+  
+  reviews Review[] // Relation to reviews
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Server  {
-  id String @id @default(uuid())
-  name String
-  imageUrl String @db.Text
-  inviteCode String @db.Text
+model Review {
+  id        String    @id @default(uuid())
+  title     String
+  content   String    @db.Text
+  rating    Int       
+  matchId   String
+  userId    String
 
-  profileId String
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  match     Match     @relation(fields: [matchId], references: [id])
+  profile   Profile   @relation(fields: [userId], references: [id])
+  comments  Comment[]
 
-  members Member[]
-  channels Channel[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([matchId], name: "matchId")
+  @@index([userId], name: "userId")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  reviewId  String
+  userId    String
+
+  review    Review   @relation(fields: [reviewId], references: [id])
+  profile   Profile  @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([profileId])
-}
-
-enum MemberRole {
-  ADMIN
-  MODERATOR
-  GUEST
-}
-
-model Member {
-  id String @id @default(uuid())
-  role MemberRole @default(GUEST)
-
-  profileId String
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  serverId String
-  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([profileId])
-  @@index([serverId])
-}
-
-enum ChannelType {
-  TEXT
-  AUDIO
-  VIDEO
-}
-
-model Channel {
-  id String @id @default(uuid())
-  name String
-  type ChannelType @default(TEXT)
-
-  profileId String
-  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  serverId String
-  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([profileId])
-  @@index([serverId])
+  @@index([reviewId], name: "reviewId")
+  @@index([userId], name: "userId")
 }

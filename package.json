@@ -1,12 +1,14 @@
 {
-  "name": "discord-clone",
+  "name": "soccer-letterboxd",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "npx prisma migrate dev --name init",
+    "db:deploy": "npx prisma migrate deploy"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.25.1",
